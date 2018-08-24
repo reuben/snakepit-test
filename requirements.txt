@@ -1,0 +1,3 @@
+sox
+pandas
+boto3
