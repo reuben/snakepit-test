@@ -1,17 +1,21 @@
 import argparse
 import boto3
+import botocore
 import os
 import pandas
+import progressbar
 import tempfile
 import unicodedata
 import urllib
 
+from boto3.s3.transfer import TransferConfig
 from multiprocessing.dummy import Pool
 from sox import Transformer
-from boto3.s3.transfer import TransferConfig
+from threading import RLock
 
 
 TRANSFER_CONFIG = TransferConfig(use_threads=False)
+SIMPLE_BAR = ['Progress ', progressbar.Bar(), ' ', progressbar.Percentage(), ' completed']
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--csv', required=True)
@@ -34,43 +38,13 @@ def validate_label(label):
     return label.lower()
 
 
-def process_one_clip(clip):
-    _, clip = clip # index, Series = clip
-
-    if clip['up_votes'] > clip['down_votes']:
-        validation = 'valid'
-    else:
-        validation = 'invalid'
-
-    path = clip['path'].replace('/', '___')
-    mp3_dest_path = os.path.join(args.tmp_folder, clip['locale'], path)
-    wav_dest_path = os.path.join(args.dest_folder, clip['locale'], validation, path[:-3] + 'wav')
-
-    if not os.path.exists(mp3_dest_path):
-        bucket.download_file(clip['path'], mp3_dest_path, Config=TRANSFER_CONFIG)
-
-    if not os.path.exists(wav_dest_path):
-        transformer = Transformer()
-        transformer.convert(samplerate=16000, n_channels=1, bitdepth=16)
-        transformer.build(mp3_dest_path, wav_dest_path)
-
-    transcript = clip['sentence']
-    if clip['locale'] == 'en' and args.normalize_english_transcripts:
-        transcript = (unicodedata.normalize('NFKD', transcript)
-                                 .encode('ascii', 'ignore')
-                                 .decode('ascii', 'ignore'))
-        transcript = validate_label(transcript)
-
-    return (clip['locale'], validation, os.path.abspath(wav_dest_path), os.path.getsize(wav_dest_path), transcript)
-
-
 if __name__ == '__main__':
     if not os.path.exists(args.tmp_folder):
         os.makedirs(args.tmp_folder)
 
     bucket = boto3.resource('s3').Bucket('voice-prod-clips-393eefd0cba28c270ced0f9587a4f6ae601ca91e')
 
-    clips = pandas.read_csv(args.csv, sep=None, encoding='utf-8')
+    clips = pandas.read_csv(args.csv, sep='\t', encoding='utf-8')
 
     locales = clips['locale'].unique()
     print('found {} locales, creating folders...'.format(len(locales)))
@@ -82,12 +56,53 @@ if __name__ == '__main__':
         os.makedirs(os.path.join(args.dest_folder, locale, 'valid'), exist_ok=True)
         os.makedirs(os.path.join(args.dest_folder, locale, 'invalid'), exist_ok=True)
 
+    rows = []
+    lock = RLock()
+
+    def process_one_clip(clip):
+        _, clip = clip # index, Series = clip
+
+        if clip.up_votes > clip.down_votes:
+            validation = 'valid'
+        else:
+            validation = 'invalid'
+
+        path = clip.path.replace('/', '___')
+        mp3_dest_path = os.path.join(args.tmp_folder, clip.locale, path)
+        wav_dest_path = os.path.join(args.dest_folder, clip.locale, validation, path[:-3] + 'wav')
+
+        if not os.path.exists(mp3_dest_path):
+            bucket.download_file(clip.path, mp3_dest_path, Config=TRANSFER_CONFIG)
+
+        if not os.path.exists(wav_dest_path):
+            try:
+                transformer = Transformer()
+                transformer.convert(samplerate=16000, n_channels=1, bitdepth=16)
+                transformer.build(mp3_dest_path, wav_dest_path)
+            except:
+                return
+
+        transcript = clip.sentence
+        if clip.locale == 'en' and args.normalize_english_transcripts:
+            transcript = (unicodedata.normalize('NFKD', transcript)
+                                     .encode('ascii', 'ignore')
+                                     .decode('ascii', 'ignore'))
+            transcript = validate_label(transcript)
+
+        with lock:
+            rows.append((clip.locale, validation, os.path.abspath(wav_dest_path), os.path.getsize(wav_dest_path), transcript))
+
     pool = Pool()
-    results = pool.map(process_one_clip, clips.iterrows())
+
+    bar = progressbar.ProgressBar(max_value=len(clips), widgets=SIMPLE_BAR)
+    for i, _ in enumerate(pool.imap_unordered(process_one_clip, clips.iterrows()), start=1):
+        bar.update(i)
+    bar.finish()
+
     pool.close()
     pool.join()
 
-    data = pandas.DataFrame(data=results, columns=('locale', 'validation', 'wav_filename', 'wav_filesize', 'transcript'))
+    data = pandas.DataFrame(data=rows, columns=('locale', 'validation', 'wav_filename', 'wav_filesize', 'transcript'))
 
     for locale in locales:
         locale_data = data[data['locale'] == locale]

@@ -1,3 +1,4 @@
 sox
 pandas
 boto3
+progressbar2

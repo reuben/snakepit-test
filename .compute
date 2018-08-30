@@ -4,4 +4,4 @@ set -x
 
 source ../tmp/venv/bin/activate
 
-python3 import_cv_dump.py /snakepit/shared/data/mozilla/CommonVoice/v2.0-alpha1.0/clips.tsv --dest_folder ../keep --tmp_folder ../tmp --normalize_english_transcripts
+python3 import_cv_dump.py --csv /snakepit/shared/data/mozilla/CommonVoice/v2.0-alpha1.0/clips.tsv --dest_folder ../keep --tmp_folder ../tmp --normalize_english_transcripts
