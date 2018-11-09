@@ -1,7 +1,6 @@
 #!/bin/sh
 
-set -x
+# set -x
 
-source ../tmp/venv/bin/activate
+# source ../tmp/venv/bin/activate
 
-python3 cv_stats.py '/snakepit/shared/data/mozilla/CommonVoice/v2.0-alpha1.0'
