@@ -1,6 +1,52 @@
 #!/bin/sh
 
-# set -x
+set -xe
 
-# source ../tmp/venv/bin/activate
+while true; do sleep 1000000; done
 
+export HOME=${USER_DIR}
+export PATH=$PATH:${HOME}/.cargo/bin
+
+# data="${SHARED_DIR}/data"
+# cv2de="${data}/mozilla/CommonVoice/v2.0/de/clips"
+
+# # apt-get install -y parallel sox libsox-fmt-mp3
+
+# # pushd /tmp
+# #     mkdir /tmp/mp3
+# #     pushd /tmp/mp3
+# #         tar --warning=no-unknown-keyword -xf "${cv2de}/../de.tar.gz" --totals
+# #     popd
+
+# #     mkdir /tmp/wav
+# #     set +e
+# #     find /tmp/mp3/clips -name '*.mp3' | parallel --bar sox -G {} --compression 0.0 --no-dither -e signed -L -c 1 -b 16 -r 16k -t wav /tmp/wav/{/.}.wav
+# #     set -e
+# # popd
+
+# # cp -R /tmp/wav ${USER_DIR}/de_validated_clips
+
+
+
+
+# pip3 install pandas argparse
+# cp ${cv2de}/../validated.tsv /tmp/validated.tsv
+# python3 split.py --source_tsv /tmp/validated.tsv --train_dest /tmp/train.csv --dev_dest /tmp/dev.csv --test_dest /tmp/test.csv --wavs_dir ${USER_DIR}/de_validated_clips
+
+# head /tmp/train.csv
+# head /tmp/dev.csv
+# head /tmp/test.csv
+
+# rm ${USER_DIR}/de_csv/*.csv
+
+# # mkdir -p ${USER_DIR}/de_csv
+# cp /tmp/train.csv ${USER_DIR}/de_csv/train.csv
+# cp /tmp/dev.csv ${USER_DIR}/de_csv/dev.csv
+# cp /tmp/test.csv ${USER_DIR}/de_csv/test.csv
+
+# # # mkdir -p ${USER_DIR}/decoder_utf8
+# # # mv ${USER_DIR}/ds_ctcdecoder_utf8*.whl ${USER_DIR}/decoder_utf8/ds_ctcdecoder-0.5.0a5-cp36-cp36m-linux_x86_64.whl
+
+# # # ls -ll ${USER_DIR}/cv2-de-train-cache
+
+# # cp ${USER_DIR}/de_csv/* ../keep

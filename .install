@@ -1,7 +1,0 @@
-#!/bin/bash
-
-virtualenv -p python3 ../tmp/venv
-source ../tmp/venv/bin/activate
-pip install -r requirements.txt
-
-python3 import_cv_dump.py --csv /snakepit/shared/data/mozilla/CommonVoice/v2.0-alpha1.0/clips.tsv --dest_folder ../keep --tmp_folder ../tmp --normalize_english_transcripts
