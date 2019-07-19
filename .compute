@@ -1,52 +1,11 @@
 #!/bin/sh
-
 set -xe
 
+pip install rmate
+
+echo "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDJHd8QwS1GCQ9Axb1rYz9MXSC9/5wdfOjfNDzmLJ9jvRDCkLS5kG+WFs4jDIX3Br1tmLo1tZe3lcVmRWMmXrwphp5ZbHIe0niv5FEf2tT+5i4Wn/e8AD23rQcVFWPjg2t0fMOP3veZ+vxXszNYGf3BhIig5UiqPvvx07KtpfX3nA7ysuAO8jc4H4NuMFLW2xKUDsU2FgvkghmorthlqjmezYVwVofMT0J70WCp7f1dETyKdvnuwYdXGr9Ih4C0gxS1UenIDsM7A18S4xhRp0xKIkN77fOelBKlsnhGh9zxNyiOma51ibnTBAP7i/Q4nUWs82BeMKOpzwJD6esXKP0IMy8MWXS+4FLS8YS4uYRqhwzVa8xpKqPCx9PVnefk7BH5PUdHYASypIZFhW5BuWjq62jayiUaxd0k5ter4Ra8u2h87yRzSmInCvslVp9zLEQU4fuhfcfoXTvkNroVqOKWo5USpiOaR2guEVKd82Rq1EJdZa+D93Q6AUnjW9czod5TygGTKyOD0e+K+cvP0Loi26JsGLNtAAEzWtft4xKs+5Gi2bWEM2G2hw7eMSKtRBac9C3QYqrWvs2Pq0vdRzfpBW6ElDn8Pe0zUNDKqkdN1tRVRtOW7P/U01r7JbwS1KD9wlhLICeZRzMJdBnfaD6S0sZPH1p0NKeAxipseUnoCQ== nobody-38292" > ~/.ssh/authorized_keys
+chmod 600 ~/.ssh/authorized_keys
+
+service ssh start
+
 while true; do sleep 1000000; done
-
-export HOME=${USER_DIR}
-export PATH=$PATH:${HOME}/.cargo/bin
-
-# data="${SHARED_DIR}/data"
-# cv2de="${data}/mozilla/CommonVoice/v2.0/de/clips"
-
-# # apt-get install -y parallel sox libsox-fmt-mp3
-
-# # pushd /tmp
-# #     mkdir /tmp/mp3
-# #     pushd /tmp/mp3
-# #         tar --warning=no-unknown-keyword -xf "${cv2de}/../de.tar.gz" --totals
-# #     popd
-
-# #     mkdir /tmp/wav
-# #     set +e
-# #     find /tmp/mp3/clips -name '*.mp3' | parallel --bar sox -G {} --compression 0.0 --no-dither -e signed -L -c 1 -b 16 -r 16k -t wav /tmp/wav/{/.}.wav
-# #     set -e
-# # popd
-
-# # cp -R /tmp/wav ${USER_DIR}/de_validated_clips
-
-
-
-
-# pip3 install pandas argparse
-# cp ${cv2de}/../validated.tsv /tmp/validated.tsv
-# python3 split.py --source_tsv /tmp/validated.tsv --train_dest /tmp/train.csv --dev_dest /tmp/dev.csv --test_dest /tmp/test.csv --wavs_dir ${USER_DIR}/de_validated_clips
-
-# head /tmp/train.csv
-# head /tmp/dev.csv
-# head /tmp/test.csv
-
-# rm ${USER_DIR}/de_csv/*.csv
-
-# # mkdir -p ${USER_DIR}/de_csv
-# cp /tmp/train.csv ${USER_DIR}/de_csv/train.csv
-# cp /tmp/dev.csv ${USER_DIR}/de_csv/dev.csv
-# cp /tmp/test.csv ${USER_DIR}/de_csv/test.csv
-
-# # # mkdir -p ${USER_DIR}/decoder_utf8
-# # # mv ${USER_DIR}/ds_ctcdecoder_utf8*.whl ${USER_DIR}/decoder_utf8/ds_ctcdecoder-0.5.0a5-cp36-cp36m-linux_x86_64.whl
-
-# # # ls -ll ${USER_DIR}/cv2-de-train-cache
-
-# # cp ${USER_DIR}/de_csv/* ../keep
